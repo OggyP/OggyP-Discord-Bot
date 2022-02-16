@@ -1,0 +1,36 @@
+{
+    "name": "oggypbot",
+    "version": "1.0.0",
+    "description": "OggyP Discord Bot",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js",
+        "getIds": "node ./dev/getIds.js",
+        "getClassList": "node ./dev/getClassList.js",
+        "getClasses": "node ./dev/getClasses.js",
+        "rebind": "node ./dev/rebind.js"
+    },
+    "keywords": [
+        "discord"
+    ],
+    "author": "OggyP",
+    "license": "ISC",
+    "dependencies": {
+        "@discordjs/builders": "^0.6.0",
+        "@discordjs/rest": "^0.1.0-canary.0",
+        "cheerio": "^1.0.0-rc.10",
+        "discord-api-types": "^0.22.0",
+        "discord.js": "^13.1.0",
+        "mysql": "^2.18.1",
+        "node-schedule": "^2.0.0",
+        "request": "^2.88.2"
+    },
+    "devDependencies": {
+        "eslint": "^7.32.0",
+        "eslint-config-standard": "^16.0.3",
+        "eslint-plugin-import": "^2.24.2",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^5.1.0"
+    }
+}

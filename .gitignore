@@ -1,0 +1,11 @@
+/.vscode
+/config.json
+/node_modules
+/package-lock.json
+resources/classList.json
+resources/studentClassesList.json
+resources/both/nameIdList.json
+resources/both/nameToId.json
+resources/students/nameIdList.json
+resources/both/nameToClasses.json
+data/timetables.json
