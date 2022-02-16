@@ -9,7 +9,8 @@
         "getIds": "node ./dev/getIds.js",
         "getClassList": "node ./dev/getClassList.js",
         "getClasses": "node ./dev/getClasses.js",
-        "rebind": "node ./dev/rebind.js"
+        "rebind": "node ./dev/rebind.js",
+        "setup": "node ./dev/setup.js"
     },
     "keywords": [
         "discord"
@@ -24,6 +25,7 @@
         "discord.js": "^13.1.0",
         "mysql": "^2.18.1",
         "node-schedule": "^2.0.0",
+        "prompt-sync": "^4.2.0",
         "request": "^2.88.2"
     },
     "devDependencies": {
