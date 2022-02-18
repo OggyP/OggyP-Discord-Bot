@@ -17,19 +17,6 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '9' }).setToken(token);
 
-// (async () => {
-// 	try {
-// 		await rest.put(
-// 			Routes.applicationCommands(clientId, guildId),
-// 			{ body: commands },
-// 		);
-
-// 		console.log('Successfully registered application commands.');
-// 	} catch (error) {
-// 		console.error(error);
-// 	}
-// })();
-
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, "GUILDS", "GUILD_MESSAGES"] })
 client.commands = new Collection();
@@ -47,11 +34,11 @@ client.once('ready', () => {
     timetableFile.genStatus().then(newStatus => {
         client.user.setActivity(newStatus)
     });
-    // const job4 = schedule.scheduleJob('* * * * *', function() {
-    //     timetableFile.genStatus().then(newStatus => {
-    //         client.user.setActivity(newStatus)
-    //     });
-    // });
+    const job4 = schedule.scheduleJob('* * * * *', function() {
+        timetableFile.genStatus().then(newStatus => {
+            client.user.setActivity(newStatus)
+        });
+    });
 })
 
 // const job1 = schedule.scheduleJob('15 * * * *', function() {

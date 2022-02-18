@@ -1,7 +1,9 @@
+// OLD timetable.js
+
 const { SlashCommandBuilder } = require('@discordjs/builders');
 var fs = require('fs');
 const { loginCreds } = require('../config.json');
-const { Client, Intents, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 
 var timetables = {}
 var defaultInfo = {}
@@ -88,7 +90,7 @@ fs.readFile("data/jalapeno.json", 'utf8', function(err, buf) {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('timetable')
+        .setName('t')
         .setDescription('Everything you could want to know about your NBSC Manly timetable!')
         .addSubcommand(subCommand =>
             subCommand.setName('now')
@@ -330,21 +332,29 @@ module.exports = {
                             if ((new Date()).getWeek() % 2 === 0) {
                                 week = 'b'
                             }
-                            sendTimetableEmbed(interaction, false, week, currentDay, currentPeriod[1], true)
+                            sendTimetableEmbed(interaction, false, week, currentDay, currentPeriod[1], true, "**CURRENT PERIOD:**")
                         } else {
-                            const row = new MessageActionRow()
-                                .addComponents(
-                                    new MessageButton()
-                                    .setCustomId('timetable-next')
-                                    .setLabel('Next Period')
-                                    .setStyle('PRIMARY'),
-                                    new MessageButton()
-                                    .setCustomId('timetable-today-' + interaction.user.id)
-                                    .setLabel('Subjects Today')
-                                    .setStyle('PRIMARY'),
-                                );
+                            var currentDay = (new Date()).getDay().toString()
+                            nextPeriod(currentDay)
+                                .then(currentPeriod => {
+                                    if (currentPeriod[0]) {
+                                        var week = 'a'
+                                        if ((new Date()).getWeek() % 2 === 0) {
+                                            week = 'b'
+                                        }
+                                        sendTimetableEmbed(interaction, false, week, currentDay, currentPeriod[1], true, "**NEXT PERIOD:**")
+                                    } else {
+                                        const row = new MessageActionRow()
+                                            .addComponents(
+                                                new MessageButton()
+                                                .setCustomId('timetable-today-' + interaction.user.id)
+                                                .setLabel('Subjects Today')
+                                                .setStyle('PRIMARY'),
+                                            );
 
-                            interaction.reply({ content: 'You have no class now!', ephemeral: false, components: [row] });
+                                        interaction.reply({ content: 'You have no more periods today!', components: [row] })
+                                    }
+                                })
                         }
                     })
             } else {
@@ -668,34 +678,15 @@ module.exports = {
             } else {
                 interaction.reply('You need to bind your timetable . e.g. /timetable bind Oscar Pritchard')
             }
-        } else if (interaction.customId.startsWith('timetable-today')) {
-            if (interaction.customId.split('-')[2] === interaction.user.id) {
-                var week = 'a'
-                if ((new Date()).getWeek() % 2 === 0) {
-                    week = 'b'
-                }
-                var currentDay = (new Date()).getDay().toString()
-                sendDayEmbed(week, currentDay, interaction, true)
-            } else {
-                interaction.reply({ content: 'This is not your timetable idot!', ephemeral: true });
-            }
-        }
-        //timetable-day-WEEK-DAY-ID
+        } else if (interaction.customId.startsWith('timetable-today'))
+            sendTodayEmbed(interaction, (interaction.customId.split('-')[2] === interaction.user.id))
         else if (interaction.customId.startsWith('timetable-day')) {
             info = interaction.customId.split('-')
-            if (info[4] === interaction.user.id) {
-                sendDayEmbed(info[2], info[3], interaction, true)
-            } else {
-                interaction.reply({ content: 'This is not your timetable idot!', ephemeral: true });
-            }
+            sendDayEmbed(info[2], info[3], interaction, (info[4] === interaction.user.id))
         } else if (interaction.customId.startsWith('timetable-class')) {
             var info = interaction.customId.split('-')
             console.log(info)
-            if (info[5] === interaction.user.id) {
-                sendTimetableEmbed(interaction, true, info[2], info[3], info[4])
-            } else {
-                interaction.reply({ content: 'This is not your timetable idot!', ephemeral: true });
-            }
+            sendTimetableEmbed(interaction, (info[5] === interaction.user.id), info[2], info[3], info[4])
         }
         // else if (interaction.customId === 'timetable-login') {
         //     if (timetables[interaction.user.id].hasOwnProperty('password')) {
@@ -813,7 +804,7 @@ module.exports = {
     }
 };
 
-function sendTimetableEmbed(interaction, edit, week, day, period, loginOption = false) {
+function sendTimetableEmbed(interaction, edit, week, day, period, messageText = null) {
     if (timetables.hasOwnProperty(interaction.user.id)) {
         if (timetables[interaction.user.id].hasOwnProperty(week) && timetables[interaction.user.id][week].hasOwnProperty(day) && timetables[interaction.user.id][week][day].hasOwnProperty(period)) {
             // Get current Day etc
@@ -946,6 +937,8 @@ function sendTimetableEmbed(interaction, edit, week, day, period, loginOption = 
             })
 
             message.components = rows
+            if (messageText)
+                message.content = messageText
 
             if (edit) {
                 try {
@@ -958,7 +951,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, loginOption = 
             }
 
         } else {
-            interaction.reply({ content: 'Sorry, that class does not exist.', ephemeral: true });
+            interaction.reply({ content: `You do not have a class on week ${week} ${dayFromNum[day]}, period ${period}`, ephemeral: true });
         }
     } else {
         interaction.reply({ content: 'You need to bind your timetable . e.g. /timetable bind Oscar Pritchard', ephemeral: true });
@@ -1081,6 +1074,15 @@ function createEmbedTimetable(userID, week, day, period) {
 
 let altPeriodNames = {
     'Assembly': "PC"
+}
+
+function sendTodayEmbed(interaction, edit = true) {
+    var week = 'a'
+    if ((new Date()).getWeek() % 2 === 0) {
+        week = 'b'
+    }
+    var currentDay = (new Date()).getDay().toString()
+    sendDayEmbed(week, currentDay, interaction, edit)
 }
 
 function sendDayEmbed(week, day, interaction, edit = false) {
@@ -1433,10 +1435,12 @@ const getCurrentPeriod = (day) => {
                         startDate = new Date(currentDate.getTime());
                         startDate.setHours(bellTimes[day][period][0].split(":")[0]);
                         startDate.setMinutes(bellTimes[day][period][0].split(":")[1]);
+                        startDate.setSeconds(0)
 
                         endDate = new Date(currentDate.getTime());
                         endDate.setHours(bellTimes[day][period][1].split(":")[0]);
                         endDate.setMinutes(bellTimes[day][period][1].split(":")[1]);
+                        endDate.setSeconds(0)
 
                         if (startDate <= currentDate && endDate >= currentDate) {
                             currentPeriod = [true, period]
@@ -1464,6 +1468,7 @@ const nextPeriod = (day) => {
                         startDate = new Date(currentDate.getTime());
                         startDate.setHours(bellTimes[day][period][0].split(":")[0]);
                         startDate.setMinutes(bellTimes[day][period][0].split(":")[1]);
+                        startDate.setSeconds(0)
                         if (startDate >= currentDate) {
                             currentPeriod = [true, period]
                             foundPeriod = true

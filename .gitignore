@@ -9,3 +9,4 @@ resources/both/nameToId.json
 resources/students/nameIdList.json
 resources/both/nameToClasses.json
 data/timetables.json
+data/defaultInfo.json
