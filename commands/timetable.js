@@ -38,11 +38,14 @@ const classToColour = {
 }
 
 const dayFromNum = {
+    '0': 'Sunday',
     '1': 'Monday',
     '2': 'Tuesday',
     '3': 'Wednesday',
     '4': 'Thursday',
-    '5': 'Friday'
+    '5': 'Friday',
+    '6': 'Saturday',
+    '7': 'Sunday',
 };
 
 fs.readFile("data/timetables.json", 'utf8', function(err, buf) {
@@ -347,7 +350,7 @@ module.exports = {
                                         const row = new MessageActionRow()
                                             .addComponents(
                                                 new MessageButton()
-                                                .setCustomId('timetable-today-' + interaction.user.id)
+                                                .setCustomId('t-today-' + interaction.user.id)
                                                 .setLabel('Subjects Today')
                                                 .setStyle('PRIMARY'),
                                             );
@@ -375,11 +378,11 @@ module.exports = {
                             const row = new MessageActionRow()
                                 .addComponents(
                                     new MessageButton()
-                                    .setCustomId('timetable-now')
+                                    .setCustomId('t-now')
                                     .setLabel('Current Period')
                                     .setStyle('PRIMARY'),
                                     new MessageButton()
-                                    .setCustomId('timetable-today-' + interaction.user.id)
+                                    .setCustomId('t-today-' + interaction.user.id)
                                     .setLabel('Subjects Today')
                                     .setStyle('PRIMARY'),
                                 );
@@ -618,7 +621,7 @@ module.exports = {
     },
     // Button interactions
     async button(interaction) {
-        if (interaction.customId === 'timetable-next') {
+        if (interaction.customId === 't-next') {
             if (timetables.hasOwnProperty(interaction.user.id)) {
                 var currentDay = (new Date()).getDay().toString()
                 nextPeriod(currentDay)
@@ -633,11 +636,11 @@ module.exports = {
                             const row = new MessageActionRow()
                                 .addComponents(
                                     new MessageButton()
-                                    .setCustomId('timetable-now')
+                                    .setCustomId('t-now')
                                     .setLabel('Current Period')
                                     .setStyle('PRIMARY'),
                                     new MessageButton()
-                                    .setCustomId('timetable-today-' + interaction.user.id)
+                                    .setCustomId('t-today-' + interaction.user.id)
                                     .setLabel('Subjects Today')
                                     .setStyle('PRIMARY'),
                                 );
@@ -648,7 +651,7 @@ module.exports = {
             } else {
                 interaction.reply('You need to bind your timetable . e.g. /timetable bind Oscar Pritchard')
             }
-        } else if (interaction.customId === 'timetable-now') {
+        } else if (interaction.customId === 't-now') {
             if (timetables.hasOwnProperty(interaction.user.id)) {
                 var currentDay = (new Date()).getDay().toString()
                 getCurrentPeriod(currentDay)
@@ -663,11 +666,11 @@ module.exports = {
                             const row = new MessageActionRow()
                                 .addComponents(
                                     new MessageButton()
-                                    .setCustomId('timetable-next')
+                                    .setCustomId('t-next')
                                     .setLabel('Next Period')
                                     .setStyle('PRIMARY'),
                                     new MessageButton()
-                                    .setCustomId('timetable-today-' + interaction.user.id)
+                                    .setCustomId('t-today-' + interaction.user.id)
                                     .setLabel('Subjects Today')
                                     .setStyle('PRIMARY'),
                                 );
@@ -678,17 +681,17 @@ module.exports = {
             } else {
                 interaction.reply('You need to bind your timetable . e.g. /timetable bind Oscar Pritchard')
             }
-        } else if (interaction.customId.startsWith('timetable-today'))
+        } else if (interaction.customId.startsWith('t-today'))
             sendTodayEmbed(interaction, (interaction.customId.split('-')[2] === interaction.user.id))
-        else if (interaction.customId.startsWith('timetable-day')) {
+        else if (interaction.customId.startsWith('t-day')) {
             info = interaction.customId.split('-')
             sendDayEmbed(info[2], info[3], interaction, (info[4] === interaction.user.id))
-        } else if (interaction.customId.startsWith('timetable-class')) {
+        } else if (interaction.customId.startsWith('t-class')) {
             var info = interaction.customId.split('-')
             console.log(info)
             sendTimetableEmbed(interaction, (info[5] === interaction.user.id), info[2], info[3], info[4])
         }
-        // else if (interaction.customId === 'timetable-login') {
+        // else if (interaction.customId === 't-login') {
         //     if (timetables[interaction.user.id].hasOwnProperty('password')) {
         //         var week = 'a'
         //         if ((new Date()).getWeek() % 2 === 0) {
@@ -876,7 +879,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, messageText = 
                     let periodToDisplay = (altPeriodNames.hasOwnProperty(newPeriod)) ? altPeriodNames[newPeriod] : newPeriod
                     messageButtons[msgBtnRow].push(
                         new MessageButton()
-                        .setCustomId('timetable-class-' + week + "-" + day + "-" + newPeriod + "-" + interaction.user.id)
+                        .setCustomId('t-class-' + week + "-" + day + "-" + newPeriod + "-" + interaction.user.id)
                         .setLabel(periodToDisplay + ' | ' + timetables[interaction.user.id][week][day][newPeriod].code)
                         .setStyle('DANGER')
                     )
@@ -891,7 +894,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, messageText = 
             let currentPeriodToDisplay = (altPeriodNames.hasOwnProperty(period)) ? altPeriodNames[period] : period
             messageButtons[msgBtnRow].push(
                 new MessageButton()
-                .setCustomId('timetable-day-' + week + '-' + day + "-" + interaction.user.id)
+                .setCustomId('t-day-' + week + '-' + day + "-" + interaction.user.id)
                 .setLabel(currentPeriodToDisplay + ' | ' + subject.code)
                 .setStyle('SECONDARY')
             )
@@ -907,7 +910,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, messageText = 
                     let periodToDisplay = (altPeriodNames.hasOwnProperty(newPeriod)) ? altPeriodNames[newPeriod] : newPeriod
                     messageButtons[msgBtnRow].push(
                         new MessageButton()
-                        .setCustomId('timetable-class-' + week + "-" + day + "-" + newPeriod + "-" + interaction.user.id)
+                        .setCustomId('t-class-' + week + "-" + day + "-" + newPeriod + "-" + interaction.user.id)
                         .setLabel(periodToDisplay + ' | ' + timetables[interaction.user.id][week][day][newPeriod].code)
                         .setStyle('SUCCESS')
                     )
@@ -918,7 +921,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, messageText = 
             // if (loginOption) {
             //     messageButtons.push(
             //         new MessageButton()
-            //         .setCustomId('timetable-login')
+            //         .setCustomId('t-login')
             //         .setLabel('Login To Current/Next Class')
             //         .setStyle('SUCCESS')
             //     )
@@ -1007,7 +1010,7 @@ function createEmbedTimetable(userID, week, day, period) {
             let periodToDisplay = (altPeriodNames.hasOwnProperty(newPeriod)) ? altPeriodNames[newPeriod] : newPeriod
             messageButtons[msgBtnRow].push(
                 new MessageButton()
-                .setCustomId('timetable-class-' + week + "-" + day + "-" + bellTimes.order[day][idx] + "-" + userID)
+                .setCustomId('t-class-' + week + "-" + day + "-" + bellTimes.order[day][idx] + "-" + userID)
                 .setLabel(periodToDisplay + ' | ' + timetables[userID][week][day][newPeriod].code)
                 .setStyle('DANGER')
             )
@@ -1023,7 +1026,7 @@ function createEmbedTimetable(userID, week, day, period) {
     let currentPeriodToDisplay = (altPeriodNames.hasOwnProperty(period)) ? altPeriodNames[period] : period
     messageButtons[msgBtnRow].push(
         new MessageButton()
-        .setCustomId('timetable-today-' + interaction.user.id)
+        .setCustomId('t-today-' + interaction.user.id)
         .setLabel(currentPeriodToDisplay)
         .setStyle('SECONDARY')
     )
@@ -1049,7 +1052,7 @@ function createEmbedTimetable(userID, week, day, period) {
 
     // messageButtons.push(
     //     new MessageButton()
-    //     .setCustomId('timetable-login')
+    //     .setCustomId('t-login')
     //     .setLabel('Login To Current/Next Class')
     //     .setStyle('SUCCESS')
     // )
@@ -1189,7 +1192,7 @@ function sendDayEmbed(week, day, interaction, edit = false) {
                         }
                         messageButtons[msgBtnRow].push(
                             new MessageButton()
-                            .setCustomId('timetable-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
+                            .setCustomId('t-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
                             .setLabel(`${periodToDisplay} | ${subject.code}`)
                             .setStyle('DANGER')
                         )
@@ -1201,7 +1204,7 @@ function sendDayEmbed(week, day, interaction, edit = false) {
                         }
                         messageButtons[msgBtnRow].push(
                             new MessageButton()
-                            .setCustomId('timetable-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
+                            .setCustomId('t-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
                             .setLabel(`${periodToDisplay} | ${subject.code}`)
                             .setStyle('SUCCESS')
                         )
@@ -1212,7 +1215,7 @@ function sendDayEmbed(week, day, interaction, edit = false) {
                         }
                         messageButtons[msgBtnRow].push(
                             new MessageButton()
-                            .setCustomId('timetable-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
+                            .setCustomId('t-class-' + week + "-" + day + "-" + period + "-" + interaction.user.id)
                             .setLabel(`${periodToDisplay} | ${subject.code}`)
                             .setStyle('SECONDARY')
                         )
