@@ -950,6 +950,7 @@ function sendTimetableEmbed(interaction, edit, week, day, period, messageText = 
                     interaction.reply(message)
                 }
             } else {
+                message.content = undefined
                 interaction.reply(message)
             }
 
